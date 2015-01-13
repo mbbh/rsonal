@@ -38,7 +38,28 @@ void
 process_write_json_string(VALUE str, VALUE input)
 {
   struct RString *rstr = RSTRING(input);
+  rb_str_cat2(str, "\"");
   rb_str_cat(str, RSTRING_PTR(rstr), RSTRING_LEN(rstr));
+  rb_str_cat2(str, "\"");
+}
+
+void
+process_write_json_array(VALUE str, VALUE input)
+{
+  int i;
+  long siz;
+  struct RArray *rarr;
+
+  rarr = RARRAY(input);
+  siz = RARRAY_LEN(rarr);
+  rb_str_cat2(str, "[");
+  for(i=0;i < siz;i++)
+  {
+    process_write_json_data(str, rb_ary_entry(input, i));
+    if(i + 1 < siz)
+      rb_str_cat2(str, ", ");
+  }
+  rb_str_cat2(str, "]");
 }
 
 void
@@ -48,6 +69,9 @@ process_write_json_data(VALUE str, VALUE input)
   {
     case T_FIXNUM: process_write_json_fixnum(str, input);break;
     case T_STRING: process_write_json_string(str, input);break;
+    case T_ARRAY: process_write_json_array(str, input);break;
+    default:
+    printf("Got unsupported type %d\n", TYPE(input));
   }
 }
 

@@ -108,6 +108,11 @@ process_write_json_null(VALUE str)
   rb_str_cat2(str, "null");
 }
 
+void
+process_write_json_other(VALUE str, VALUE input)
+{
+  process_write_json_data(str, rb_funcall(input, rb_intern("to_s"), 0));
+}
 
 void
 process_write_json_data(VALUE str, VALUE input)
@@ -122,8 +127,7 @@ process_write_json_data(VALUE str, VALUE input)
     case T_TRUE: process_write_json_bool(str, 0);break;
     case T_FALSE: process_write_json_bool(str, 1);break;
     case T_NIL: process_write_json_null(str); break;
-    default:
-    printf("Got unsupported type %d\n", TYPE(input));
+    default: process_write_json_other(str, input);
   }
 }
 

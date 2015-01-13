@@ -63,6 +63,37 @@ process_write_json_array(VALUE str, VALUE input)
 }
 
 void
+process_write_json_symbol(VALUE str, VALUE input)
+{
+  process_write_json_string(str, rb_sym_to_s(input));
+}
+
+int
+process_write_json_hash_inner(VALUE key, VALUE val, VALUE str)
+{
+  process_write_json_data(str, key);
+  rb_str_cat2(str, ": ");
+  process_write_json_data(str, val);
+  rb_str_cat2(str, ",");
+  return ST_CONTINUE;
+}
+
+void
+process_write_json_hash(VALUE str, VALUE input)
+{
+  long old_len, new_len;
+  rb_str_cat2(str, "{");
+
+  old_len = RSTRING_LEN(str);
+  rb_hash_foreach(input, process_write_json_hash_inner, str);
+  new_len = RSTRING_LEN(str);
+
+  if(new_len > old_len)
+    rb_str_set_len(str, RSTRING_LEN(str)-1);
+  rb_str_cat2(str, "}");
+}
+
+void
 process_write_json_data(VALUE str, VALUE input)
 {
   switch(TYPE(input))
@@ -70,6 +101,8 @@ process_write_json_data(VALUE str, VALUE input)
     case T_FIXNUM: process_write_json_fixnum(str, input);break;
     case T_STRING: process_write_json_string(str, input);break;
     case T_ARRAY: process_write_json_array(str, input);break;
+    case T_HASH: process_write_json_hash(str, input);break;
+    case T_SYMBOL: process_write_json_symbol(str, input);break;
     default:
     printf("Got unsupported type %d\n", TYPE(input));
   }

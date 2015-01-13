@@ -94,6 +94,22 @@ process_write_json_hash(VALUE str, VALUE input)
 }
 
 void
+process_write_json_bool(VALUE str, int bool_input)
+{
+  if(bool_input)
+    rb_str_cat2(str, "true");
+  else
+    rb_str_cat2(str, "false");
+}
+
+void
+process_write_json_null(VALUE str)
+{
+  rb_str_cat2(str, "null");
+}
+
+
+void
 process_write_json_data(VALUE str, VALUE input)
 {
   switch(TYPE(input))
@@ -103,6 +119,9 @@ process_write_json_data(VALUE str, VALUE input)
     case T_ARRAY: process_write_json_array(str, input);break;
     case T_HASH: process_write_json_hash(str, input);break;
     case T_SYMBOL: process_write_json_symbol(str, input);break;
+    case T_TRUE: process_write_json_bool(str, 0);break;
+    case T_FALSE: process_write_json_bool(str, 1);break;
+    case T_NIL: process_write_json_null(str); break;
     default:
     printf("Got unsupported type %d\n", TYPE(input));
   }

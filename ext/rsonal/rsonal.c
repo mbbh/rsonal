@@ -37,7 +37,8 @@ process_write_json_fixnum(VALUE str, VALUE input)
 void
 process_write_json_string(VALUE str, VALUE input)
 {
-
+  struct RString *rstr = RSTRING(input);
+  rb_str_cat(str, RSTRING_PTR(rstr), RSTRING_LEN(rstr));
 }
 
 void

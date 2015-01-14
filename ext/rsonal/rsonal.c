@@ -1,5 +1,6 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
+#include <rsonal_string.h>
 
 VALUE Rsonal = Qnil;
 

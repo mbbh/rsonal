@@ -12,16 +12,7 @@ void process_write_json_data(VALUE str, VALUE input);
 
 void Init_rsonal() {
   Rsonal = rb_define_module("Rsonal");
-  rb_define_singleton_method(Rsonal, "read_json", rsonal_read_json, 1);
   rb_define_singleton_method(Rsonal, "write_json", rsonal_write_json, 1);
-}
-
-VALUE
-rsonal_read_json(VALUE self, VALUE file)
-{
-  printf("welcome to the ruby land\n");
-  printf("%s\n", StringValueCStr(file));
-  return Qnil;
 }
 
 void
@@ -124,8 +115,8 @@ process_write_json_data(VALUE str, VALUE input)
     case T_ARRAY: process_write_json_array(str, input);break;
     case T_HASH: process_write_json_hash(str, input);break;
     case T_SYMBOL: process_write_json_symbol(str, input);break;
-    case T_TRUE: process_write_json_bool(str, 0);break;
-    case T_FALSE: process_write_json_bool(str, 1);break;
+    case T_TRUE: process_write_json_bool(str, 1);break;
+    case T_FALSE: process_write_json_bool(str, 0);break;
     case T_NIL: process_write_json_null(str); break;
     default: process_write_json_other(str, input);
   }

@@ -19,12 +19,22 @@ void Init_rsonal() {
 void
 process_write_json_fixnum(Rst* str, VALUE input)
 {
-  char conv[32];
+  char conv[64];
   long val = NUM2LONG(input);
-  if(snprintf(conv, 32, "%ld", val) > 32)
-    rb_bug("rsonal: bug with integer conversion");
+  snprintf(conv, 64, "%ld", val);
   rst_cat_clen(str, conv);
 }
+
+void
+process_write_json_float(Rst* str, VALUE input)
+{
+  char conv[32];
+  double dbl = NUM2DBL(input);
+  printf("LAAAAA\n");
+  snprintf(conv, 32, "%09e", dbl);
+  rst_cat_clen(str, conv);
+}
+
 
 void
 process_write_json_string(Rst* str, VALUE input)
@@ -118,6 +128,7 @@ process_write_json_data(Rst* str, VALUE input)
     case T_TRUE: process_write_json_bool(str, 1);break;
     case T_FALSE: process_write_json_bool(str, 0);break;
     case T_NIL: process_write_json_null(str); break;
+    case T_FLOAT: process_write_json_float(str, input); break;
     default: process_write_json_other(str, input);
   }
 }

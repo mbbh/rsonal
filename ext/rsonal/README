@@ -1,0 +1,15 @@
+Rsonal - minimal fast JSON writer
+
+Rsonal is a very minimalistic, straight-forward JSON writer.
+It is designed to receive an arbirary ruby object and will
+attempt to turn it into JSON.
+
+There is, right now, no JSON parsing support, this library is
+write only. The generated JSON is compilant to the JSON
+specification on json.org. The generated json string does
+not support any form of pretty printing and the code is
+optimised more for speed then for readability.
+
+
+There are no external dependencies besides the ruby library.
+Tested with ruby 2.1.2.

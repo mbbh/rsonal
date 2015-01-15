@@ -78,7 +78,7 @@ process_write_json_utf8(Rst* str, VALUE input)
     }
     off = utf_numbytes(ptr[i]);
     wchar = ptr[i] & offset_mask(off);
-    for(j=0;j < off;j++)
+    for(j=0;j < off && (i+j) < siz;j++)
     {
       wchar <<= 6;
       wchar |= (ptr[++i] & 0x3F);

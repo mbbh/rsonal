@@ -89,6 +89,17 @@ rst_cat_cstr(Rst* dst, const char* input, long len)
 }
 
 void
+rst_add_char(Rst* dst, const char chr)
+{
+  if(dst->free_space < 8)
+    rst_resize(dst, 8);
+
+  dst->ptr[sizeof(char)*dst->len] = chr;
+  dst->len += 1;
+  dst->free_space -= 1;
+}
+
+void
 rst_cat_clen(Rst* dst, const char* input)
 {
   rst_cat_cstr(dst, input, strlen(input));

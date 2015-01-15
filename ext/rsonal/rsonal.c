@@ -29,9 +29,9 @@ process_write_json_fixnum(Rst* str, VALUE input)
 void
 process_write_json_string(Rst* str, VALUE input)
 {
-  rst_cat_clen(str, "\"");
+  rst_add_char(str, '"');
   rst_cat_cstr(str, RSTRING_PTR(input), RSTRING_LEN(input));
-  rst_cat_clen(str, "\"");
+  rst_add_char(str, '"');
 }
 
 void
@@ -39,18 +39,16 @@ process_write_json_array(Rst* str, VALUE input)
 {
   int i;
   long siz;
-  struct RArray *rarr;
 
-  rarr = RARRAY(input);
-  siz = RARRAY_LEN(rarr);
-  rst_cat_clen(str, "[");
+  siz = RARRAY_LEN(input);
+  rst_add_char(str, '[');
   for(i=0;i < siz;i++)
   {
     process_write_json_data(str, rb_ary_entry(input, i));
     if(i + 1 < siz)
       rst_cat_clen(str, ", ");
   }
-  rst_cat_clen(str, "]");
+  rst_add_char(str, ']');
 }
 
 void
@@ -67,7 +65,7 @@ process_write_json_hash_inner(VALUE key, VALUE val, VALUE str)
   process_write_json_data(rst, key);
   rst_cat_clen(rst, ": ");
   process_write_json_data(rst, val);
-  rst_cat_clen(rst, ",");
+  rst_add_char(rst, ',');
   return ST_CONTINUE;
 }
 
@@ -75,7 +73,7 @@ void
 process_write_json_hash(Rst* str, VALUE input)
 {
   long old_len, new_len;
-  rst_cat_clen(str, "{");
+  rst_add_char(str, '{');
 
   old_len = rst_len(str);
   rb_hash_foreach(input, process_write_json_hash_inner, rst_wrap(str));
@@ -83,7 +81,7 @@ process_write_json_hash(Rst* str, VALUE input)
 
   if(new_len > old_len)
     rst_chomp(str);
-  rst_cat_clen(str, "}");
+  rst_add_char(str, '}');
 }
 
 void

@@ -20,3 +20,4 @@ void rst_cat_cstr(Rst* dst, const char* input, long len);
 void rst_cat_clen(Rst* dst, const char* input);
 long rst_len(Rst* ptr);
 void rst_chomp(Rst* ptr);
+void rst_add_char(Rst* dst, const char chr);

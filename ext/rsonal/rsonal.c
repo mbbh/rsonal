@@ -7,7 +7,7 @@ VALUE Rsonal = Qnil;
 void Init_rsonal();
 VALUE rsonal_read_json(VALUE self, VALUE file);
 VALUE rsonal_write_json(VALUE self, VALUE input);
-void process_write_json_data(VALUE str, VALUE input);
+void process_write_json_data(Rst* str, VALUE input);
 
 
 
@@ -17,26 +17,25 @@ void Init_rsonal() {
 }
 
 void
-process_write_json_fixnum(VALUE str, VALUE input)
+process_write_json_fixnum(Rst* str, VALUE input)
 {
   char conv[32];
   long val = NUM2LONG(input);
   if(snprintf(conv, 32, "%ld", val) > 32)
     rb_bug("rsonal: bug with integer conversion");
-  rb_str_cat(str, conv, strlen(conv));
+  rst_cat_clen(str, conv);
 }
 
 void
-process_write_json_string(VALUE str, VALUE input)
+process_write_json_string(Rst* str, VALUE input)
 {
-  struct RString *rstr = RSTRING(input);
-  rb_str_cat2(str, "\"");
-  rb_str_cat(str, RSTRING_PTR(rstr), RSTRING_LEN(rstr));
-  rb_str_cat2(str, "\"");
+  rst_cat_clen(str, "\"");
+  rst_cat_cstr(str, RSTRING_PTR(input), RSTRING_LEN(input));
+  rst_cat_clen(str, "\"");
 }
 
 void
-process_write_json_array(VALUE str, VALUE input)
+process_write_json_array(Rst* str, VALUE input)
 {
   int i;
   long siz;
@@ -44,18 +43,18 @@ process_write_json_array(VALUE str, VALUE input)
 
   rarr = RARRAY(input);
   siz = RARRAY_LEN(rarr);
-  rb_str_cat2(str, "[");
+  rst_cat_clen(str, "[");
   for(i=0;i < siz;i++)
   {
     process_write_json_data(str, rb_ary_entry(input, i));
     if(i + 1 < siz)
-      rb_str_cat2(str, ", ");
+      rst_cat_clen(str, ", ");
   }
-  rb_str_cat2(str, "]");
+  rst_cat_clen(str, "]");
 }
 
 void
-process_write_json_symbol(VALUE str, VALUE input)
+process_write_json_symbol(Rst* str, VALUE input)
 {
   process_write_json_string(str, rb_sym_to_s(input));
 }
@@ -63,51 +62,53 @@ process_write_json_symbol(VALUE str, VALUE input)
 int
 process_write_json_hash_inner(VALUE key, VALUE val, VALUE str)
 {
-  process_write_json_data(str, key);
-  rb_str_cat2(str, ": ");
-  process_write_json_data(str, val);
-  rb_str_cat2(str, ",");
+  Rst* rst;
+  rst = rst_unwrap(str);
+  process_write_json_data(rst, key);
+  rst_cat_clen(rst, ": ");
+  process_write_json_data(rst, val);
+  rst_cat_clen(rst, ",");
   return ST_CONTINUE;
 }
 
 void
-process_write_json_hash(VALUE str, VALUE input)
+process_write_json_hash(Rst* str, VALUE input)
 {
   long old_len, new_len;
-  rb_str_cat2(str, "{");
+  rst_cat_clen(str, "{");
 
-  old_len = RSTRING_LEN(str);
-  rb_hash_foreach(input, process_write_json_hash_inner, str);
-  new_len = RSTRING_LEN(str);
+  old_len = rst_len(str);
+  rb_hash_foreach(input, process_write_json_hash_inner, rst_wrap(str));
+  new_len = rst_len(str);
 
   if(new_len > old_len)
-    rb_str_set_len(str, RSTRING_LEN(str)-1);
-  rb_str_cat2(str, "}");
+    rst_chomp(str);
+  rst_cat_clen(str, "}");
 }
 
 void
-process_write_json_bool(VALUE str, int bool_input)
+process_write_json_bool(Rst* str, int bool_input)
 {
   if(bool_input)
-    rb_str_cat2(str, "true");
+    rst_cat_clen(str, "true");
   else
-    rb_str_cat2(str, "false");
+    rst_cat_clen(str, "false");
 }
 
 void
-process_write_json_null(VALUE str)
+process_write_json_null(Rst* str)
 {
-  rb_str_cat2(str, "null");
+  rst_cat_clen(str, "null");
 }
 
 void
-process_write_json_other(VALUE str, VALUE input)
+process_write_json_other(Rst* str, VALUE input)
 {
   process_write_json_data(str, rb_funcall(input, rb_intern("to_s"), 0));
 }
 
 void
-process_write_json_data(VALUE str, VALUE input)
+process_write_json_data(Rst* str, VALUE input)
 {
   switch(TYPE(input))
   {
@@ -127,8 +128,16 @@ VALUE
 rsonal_write_json(VALUE self, VALUE input)
 {
   rb_encoding* utf8;
+  Rst* rst;
+  rst = rst_new();
+
+  process_write_json_data(rst, input);
+
   utf8 = rb_enc_find("UTF-8");
   VALUE str = rb_enc_str_new_cstr("", utf8);
-  process_write_json_data(str, input);
+  rb_str_cat(str, rst->ptr, rst->len);
+  rb_str_cat2(str, "");
+  rst_free(rst);
+
   return str;
 }

@@ -7,11 +7,11 @@ Rst*
 rst_new()
 {
   Rst *rst;
-  rst = malloc(sizeof(rst));
-  rst->ptr = malloc(sizeof(char)*8);
-  rst->free_space = 8;
-  rst->last_alloc = 8;
-  rst->max_size = 8;
+  rst = malloc(sizeof(Rst));
+  rst->ptr = malloc(sizeof(char)*64);
+  rst->free_space = 64;
+  rst->max_size = 64;
+  rst->len = 0;
   return rst;
 }
 
@@ -22,21 +22,31 @@ rst_free(Rst* ptr)
   free(ptr);
 }
 
+void
+rst_ptr_free(RstPtr* ptr)
+{
+  free(ptr);
+}
+
 Rst*
 rst_unwrap(VALUE rst)
 {
-  Rst* unwrap_rst;
-  Data_Get_Struct(rst, Rst, unwrap_rst);
-  return unwrap_rst;
+  RstPtr *ptr;
+  Data_Get_Struct(rst, RstPtr, ptr);
+  return ptr->ptr;
 }
 
 VALUE
 rst_wrap(Rst* rst)
 {
+  RstPtr* ptr;
+  RstPtr unwrap_ptr;
   if(rst_class == 0)
     rst_init();
 
-  return Data_Wrap_Struct(rst_class, 0, rst_free, rst);
+  ptr = malloc(sizeof(RstPtr));
+  ptr->ptr = rst;
+  return Data_Wrap_Struct(rst_class, 0, rst_ptr_free, ptr);
 }
 
 void
@@ -49,28 +59,44 @@ void
 rst_resize(Rst* ptr, long len)
 {
   long n_len;
+  char* nptr;
 
-  n_len = ptr->last_alloc;
+  n_len = 128;
   while(n_len < len)
     n_len *= 2;
 
-  ptr->ptr = realloc(ptr->ptr, ptr->max_size + n_len);
+  nptr = realloc(ptr->ptr, sizeof(char)*(ptr->max_size + n_len));
+  ptr->ptr = nptr;
   ptr->max_size += n_len;
   ptr->free_space += n_len;
-  ptr->last_alloc = n_len;
+}
+
+long
+rst_len(Rst* ptr)
+{
+  return ptr->len;
 }
 
 void
 rst_cat_cstr(Rst* dst, const char* input, long len)
 {
-  if(dst->free_space < len)
+  if(dst->free_space <= (len+8))
     rst_resize(dst, len);
-  strncat(dst->ptr, input, len);
+
+  memcpy(&(dst->ptr[sizeof(char)*dst->len]), (void*)input, len*sizeof(char));
   dst->free_space -= len;
+  dst->len += len;
 }
 
 void
 rst_cat_clen(Rst* dst, const char* input)
 {
   rst_cat_cstr(dst, input, strlen(input));
+}
+
+void
+rst_chomp(Rst* ptr)
+{
+  ptr->free_space += 1;
+  ptr->len -= 1;
 }

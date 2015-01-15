@@ -30,17 +30,75 @@ process_write_json_float(Rst* str, VALUE input)
 {
   char conv[32];
   double dbl = NUM2DBL(input);
-  printf("LAAAAA\n");
   snprintf(conv, 32, "%09e", dbl);
   rst_cat_clen(str, conv);
 }
 
+int
+is_unicode_seq_start(const unsigned char c)
+{
+  return (c >= 0xC0 && c <= 0xFD);
+}
+
+int
+utf_numbytes(const unsigned char inp)
+{
+  if((inp >> 1) == 0x7e)
+    return 5;
+  if((inp >> 2) == 0x3e)
+    return 4;
+  if((inp >> 3) == 0x1e)
+    return 3;
+  if((inp >> 4) == 0x0e)
+    return 2;
+  if((inp >> 5) == 0x06)
+    return 1;
+  return 0;
+}
+
+unsigned int
+offset_mask(int offset)
+{
+  return 0xFF >> (offset+1);
+}
+
+void
+process_write_json_utf8(Rst* str, VALUE input)
+{
+  int i, j, off;
+  unsigned long wchar;
+  char conv[8] = {0};
+  const unsigned char* ptr = (unsigned char*)RSTRING_PTR(input);
+  const int siz = RSTRING_LEN(input);
+
+  for(i=0;i < siz;i++)
+  {
+    if(!is_unicode_seq_start(ptr[i]))
+    {
+      rst_add_char(str, ptr[i]);
+      continue;
+    }
+    off = utf_numbytes(ptr[i]);
+    wchar = ptr[i] & offset_mask(off);
+    for(j=0;j < off;j++)
+    {
+      wchar <<= 6;
+      wchar |= (ptr[++i] & 0x3F);
+    };
+    off = snprintf(conv, 8, "\\u%02lx%02lx", (wchar & 0xFF00)>>8, wchar&0xFF);
+    rst_cat_cstr(str, conv, off);
+  }
+}
 
 void
 process_write_json_string(Rst* str, VALUE input)
 {
+  const char* enc_name = rb_enc_get(input)->name;
   rst_add_char(str, '"');
-  rst_cat_cstr(str, RSTRING_PTR(input), RSTRING_LEN(input));
+  if(!strncmp("US-ASCII", enc_name, 8))
+    rst_cat_cstr(str, RSTRING_PTR(input), RSTRING_LEN(input));
+  else if(!strncmp("UTF-8", enc_name, 5))
+    process_write_json_utf8(str, input);
   rst_add_char(str, '"');
 }
 

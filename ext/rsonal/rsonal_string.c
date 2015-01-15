@@ -61,7 +61,7 @@ rst_resize(Rst* ptr, long len)
   long n_len;
   char* nptr;
 
-  n_len = 128;
+  n_len = 64;
   while(n_len < len)
     n_len *= 2;
 

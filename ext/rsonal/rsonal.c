@@ -40,19 +40,17 @@ is_unicode_seq_start(const unsigned char c)
   return (c >= 0xC0 && c <= 0xFD);
 }
 
+unsigned short arr_numbytes[] = {0, 0x7E, 0x3E, 0x1E, 0x0E, 0x06};
+
 int
-utf_numbytes(const unsigned char inp)
+utf_numbytes(const unsigned short inp)
 {
-  if((inp >> 1) == 0x7e)
-    return 5;
-  if((inp >> 2) == 0x3e)
-    return 4;
-  if((inp >> 3) == 0x1e)
-    return 3;
-  if((inp >> 4) == 0x0e)
-    return 2;
-  if((inp >> 5) == 0x06)
-    return 1;
+  unsigned i;
+  for(i=1;i < 6;i++)
+  {
+    if((inp >> i) == arr_numbytes[i])
+      return 6-i;
+  }
   return 0;
 }
 

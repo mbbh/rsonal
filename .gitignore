@@ -4,3 +4,4 @@
 test.rb
 ext/rsonal/Makefile
 tmp
+*.gem

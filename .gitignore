@@ -3,3 +3,4 @@
 *.bundle
 test.rb
 ext/rsonal/Makefile
+tmp

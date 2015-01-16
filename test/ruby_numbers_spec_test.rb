@@ -18,7 +18,6 @@ describe Rsonal do
   end
 
   it "should generate big numbers into JSON" do
-    skip "minor length issue, rectified with next push"
-    assert_equal "\"#{(42**1000)}\"", Rsonal.write_json(44**1000)
+    assert_equal "#{(42**1000)}", Rsonal.write_json(42**1000)
   end
 end

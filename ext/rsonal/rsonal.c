@@ -34,6 +34,21 @@ process_write_json_float(Rst* str, VALUE input)
   rst_cat_clen(str, conv);
 }
 
+void
+process_write_json_bignum(Rst* str, VALUE input)
+{
+  int i;
+  long len;
+  VALUE res;
+  if(FIXNUM_P(input))
+  {
+    process_write_json_fixnum(str, input);
+    return;
+  }
+  res = rb_big2str(input,10);
+  rst_cat_cstr(str, RSTRING_PTR(res), RSTRING_LEN(res));
+}
+
 int
 is_unicode_seq_start(const unsigned char c)
 {
@@ -185,6 +200,7 @@ process_write_json_data(Rst* str, VALUE input)
     case T_FALSE: process_write_json_bool(str, 0);break;
     case T_NIL: process_write_json_null(str); break;
     case T_FLOAT: process_write_json_float(str, input); break;
+    case T_BIGNUM: process_write_json_bignum(str, input);break;
     default: process_write_json_other(str, input);
   }
 }

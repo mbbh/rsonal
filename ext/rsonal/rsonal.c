@@ -25,6 +25,18 @@ process_write_json_fixnum(Rst* str, VALUE input)
   rst_cat_clen(str, conv);
 }
 
+// int
+// numdigits(double dbl)
+// {
+//   long count = 0;
+//   while(abs(dbl) >= 0.0000001)
+//   {
+//     dbl = dbl * 10;
+//     count = count + 1;
+//     num = num - (int)num;
+//   }
+// }
+
 void
 process_write_json_float(Rst* str, VALUE input)
 {

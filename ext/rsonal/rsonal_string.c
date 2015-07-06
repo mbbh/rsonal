@@ -89,6 +89,18 @@ rst_cat_cstr(Rst* dst, const char* input, long len)
 }
 
 void
+rst_add_char_check(Rst* dst, const char chr, const char *(*needs_escape)(const char))
+{
+  const char* esc = (*needs_escape)(chr);
+  if(strlen(esc))
+  {
+    rst_cat_cstr(dst, esc, strlen(esc));
+  }
+  else
+    rst_add_char(dst, chr);
+}
+
+void
 rst_add_char(Rst* dst, const char chr)
 {
   if(dst->free_space < 8)

@@ -17,7 +17,7 @@ describe Rsonal do
     assert falsedd
   end
 
-  it "should generate big numbers into JSON" do
+  it "should handle ruby bignums correctly" do
     assert_equal "#{(42**1000)}", Rsonal.write_json(42**1000)
   end
 end

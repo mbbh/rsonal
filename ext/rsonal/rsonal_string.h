@@ -21,3 +21,4 @@ void rst_cat_clen(Rst* dst, const char* input);
 long rst_len(Rst* ptr);
 void rst_chomp(Rst* ptr);
 void rst_add_char(Rst* dst, const char chr);
+void rst_add_char_check(Rst* dst, const char chr, const char* (*needs_escape)(const char));

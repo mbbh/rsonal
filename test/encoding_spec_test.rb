@@ -16,4 +16,9 @@ describe Rsonal do
     json = Rsonal.write_json "H\u3321llo\u6712world\u1100"
     assert_equal '"H\u3321llo\u6712world\u1100"', json
   end
+
+  it "should handle special character escape sequences" do
+    json = Rsonal.write_json '\t"\b\f\r"'
+    assert_equal '"\t\"\b\f\r\""', json
+  end
 end

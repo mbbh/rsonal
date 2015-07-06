@@ -87,6 +87,20 @@ offset_mask(int offset)
   return 0xFF >> (offset+1);
 }
 
+const char*
+check_str_escape(const char chr)
+{
+  switch(chr)
+  {
+    case '"': return "\\\"";
+    case '\t': return "\\t";
+    case '\b': return "\\b";
+    case '\r': return "\\r";
+    case '\f': return "\\f";
+  }
+  return "";
+}
+
 void
 process_write_json_utf8(Rst* str, VALUE input)
 {
@@ -100,7 +114,7 @@ process_write_json_utf8(Rst* str, VALUE input)
   {
     if(!is_unicode_seq_start(ptr[i]))
     {
-      rst_add_char(str, ptr[i]);
+      rst_add_char_check(str, ptr[i], &check_str_escape);
       continue;
     }
     off = utf_numbytes(ptr[i]);

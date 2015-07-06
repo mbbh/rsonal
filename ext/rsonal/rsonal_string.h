@@ -17,6 +17,9 @@ Rst* rst_unwrap(VALUE rst);
 VALUE rst_wrap(Rst* rst);
 void rst_init();
 void rst_cat_cstr(Rst* dst, const char* input, long len);
+void rst_cat_cstr_check(Rst* dst, const char* input, long len,
+  const char *(*needs_escape)(const char),
+  int (*has_escape_chars)(const char*, long));
 void rst_cat_clen(Rst* dst, const char* input);
 long rst_len(Rst* ptr);
 void rst_chomp(Rst* ptr);

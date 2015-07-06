@@ -89,7 +89,24 @@ rst_cat_cstr(Rst* dst, const char* input, long len)
 }
 
 void
-rst_add_char_check(Rst* dst, const char chr, const char *(*needs_escape)(const char))
+rst_cat_cstr_check(Rst* dst, const char* input, long len,
+  const char *(*needs_escape)(const char),
+  int (*has_escape_chars)(const char*, long))
+{
+  int i;
+  if(!has_escape_chars(input, len))
+  {
+    rst_cat_cstr(dst, input, len);
+    return;
+  }
+
+  for(i=0;i<len;i++)
+    rst_add_char_check(dst, input[i], needs_escape);
+}
+
+void
+rst_add_char_check(Rst* dst, const char chr,
+  const char *(*needs_escape)(const char))
 {
   const char* esc = (*needs_escape)(chr);
   if(strlen(esc))

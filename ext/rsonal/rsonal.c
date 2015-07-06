@@ -101,6 +101,19 @@ check_str_escape(const char chr)
   return "";
 }
 
+int
+check_needs_str_escape(const char* str, long len)
+{
+  int i;
+  for(i=0;i<len;i++)
+  {
+    if(str[i] == '"' || str[i] == '\t' || str[i] == '\b' ||
+      str[i] == '\r' || str[i] == '\f')
+      return 1;
+  }
+  return 0;
+}
+
 void
 process_write_json_utf8(Rst* str, VALUE input)
 {
@@ -135,7 +148,8 @@ process_write_json_string(Rst* str, VALUE input)
   const char* enc_name = rb_enc_get(input)->name;
   rst_add_char(str, '"');
   if(!strncmp("US-ASCII", enc_name, 8))
-    rst_cat_cstr(str, RSTRING_PTR(input), RSTRING_LEN(input));
+    rst_cat_cstr_check(str, RSTRING_PTR(input), RSTRING_LEN(input),
+      &check_str_escape, &check_needs_str_escape);
   else if(!strncmp("UTF-8", enc_name, 5))
     process_write_json_utf8(str, input);
   rst_add_char(str, '"');

@@ -21,4 +21,11 @@ describe Rsonal do
     json = Rsonal.write_json '\t"\b\f\r"'
     assert_equal '"\t\"\b\f\r\""', json
   end
+
+  it "should handle non UTF-8 encoded stings correctly" do
+    h = Hash.new
+    h["blah".force_encoding("US-ASCII")] = "\bLUP\t".force_encoding("US-ASCII")
+    json = Rsonal.write_json h
+    assert_equal '{"blah": "\\bLUP\\t"}',json
+  end
 end

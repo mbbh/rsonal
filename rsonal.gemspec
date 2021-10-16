@@ -14,7 +14,8 @@ EOF
   s.author  = "Martin Hauser"
 
   s.files = Dir.glob("ext/**/*.{c,h,rb}") +
-            Dir.glob("lib/**/*.rb")
+            Dir.glob("lib/**/*.rb") +
+            ['LICENSE']
 
   s.extensions << "ext/rsonal/extconf.rb"
 
